@@ -1,7 +1,7 @@
 import logging
-import os
 import uuid
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import Depends, FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.responses import HTMLResponse
@@ -29,9 +29,9 @@ app = FastAPI(lifespan=lifespan, title="Transaction Pipeline")
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_dashboard() -> str:
-    template_path = os.path.join(os.getcwd(), "templates", "dashboard.html")
-    if not os.path.exists(template_path):
-        raise HTTPException(status_code=404, detail="Frontend layout template asset not configured.")
+    template_path = Path(__file__).resolve().parent.parent / "templates" / "dashboard.html"
+    if not template_path.exists():
+        raise HTTPException(status_code=404, detail="Dashboard template file not found.")
     with open(template_path, "r", encoding="utf-8") as file:
         return file.read()
 
