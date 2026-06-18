@@ -50,7 +50,7 @@ async def _process_job_async(job_id: str, csv_content: str) -> None:
             await job_repo.update_status(job, JobStatus.COMPLETED)
 
         logger.info("[Job Finalized Successfully] job_id=%s", job_id)
-    except Exception as exc:  # noqa: BLE001
+    except Exception:  # noqa: BLE001
         logger.exception("[Worker Failure] job_id=%s", job_id)
         try:
             job_repo = JobRepository(session)
@@ -59,6 +59,6 @@ async def _process_job_async(job_id: str, csv_content: str) -> None:
                 await job_repo.update_status(job, JobStatus.FAILED, error_message=traceback.format_exc())
                 await session.commit()
         except Exception:  # noqa: BLE001
-            logger.exception("[Worker Failure During Recovery] job_id=%s error=%s", job_id, str(exc))
+            logger.exception("[Worker Failure During Recovery] job_id=%s", job_id)
     finally:
         await session.close()

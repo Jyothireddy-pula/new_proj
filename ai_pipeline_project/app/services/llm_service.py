@@ -29,7 +29,8 @@ class LLMService:
 
     def _retry_call(self, fn) -> Any:
         last_error: Exception | None = None
-        for attempt in range(3):
+        max_attempts = 3
+        for attempt in range(max_attempts):
             try:
                 return fn()
             except Exception as exc:  # noqa: BLE001
@@ -37,7 +38,11 @@ class LLMService:
                 sleep_for = 2**attempt
                 logger.warning("[LLM Retry] attempt=%s wait=%s error=%s", attempt + 1, sleep_for, str(exc))
                 time.sleep(sleep_for)
-        raise RuntimeError(str(last_error) if last_error else "Unknown LLM failure")
+        if last_error:
+            raise RuntimeError(
+                f"LLM request failed after {max_attempts} retry attempts: {type(last_error).__name__}: {last_error}"
+            ) from last_error
+        raise RuntimeError(f"LLM request failed after {max_attempts} retry attempts")
 
     def classify_uncategorised(self, rows: list[dict]) -> dict[int, str]:
         if not rows:
