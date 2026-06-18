@@ -121,7 +121,10 @@ class PipelineService:
             risk = (llm_summary.get("risk_level") or "medium").upper()
         except Exception as exc:  # noqa: BLE001
             logger.warning("[LLM Summary Failed] %s", str(exc))
-            narrative = "AI-powered insights temporarily unavailable. Anomaly detection completed - please review flagged transactions."
+            narrative = (
+                f"AI-powered insights temporarily unavailable. "
+                f"Anomaly detection completed with {anomaly_count} flagged transaction(s). Please review flagged transactions."
+            )
             risk = "MEDIUM" if anomaly_count else "LOW"
 
         return {
